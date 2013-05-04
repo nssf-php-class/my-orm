@@ -5,14 +5,14 @@ namespace Jace;
 abstract class Record
 {
     protected static $_db = null;
-    protected static $_dummydb = null;
+    protected $_dummydb = null;
     protected $_tableName = 'table';
     protected $_data = [];
 
     public function __construct(\PDO $db)
     {
         static::$_db = $db;
-        static::$_dummydb = $db;
+        $this->_dummydb = new \Jace\Db($db);
     }
 
     public function __set($name, $value)
@@ -51,59 +51,13 @@ abstract class Record
 
     protected function _doInsert()
     {
-
-        // 轉換欲新增的資料
-        $bind = $this->_data;
-        $cols = [];
-        $vals = [];
-
-        foreach ($bind as $col => $val) {
-            $cols[] = $this->quoteIdentifier($col);
-            $vals[] = '?';
-        }
-
-        // 建立 INSERT 語法
-        $sql = "INSERT INTO "
-            . $this->quoteIdentifier($this->_tableName)
-            . ' (' . implode(', ', $cols) . ') '
-            . 'VALUES (' . implode(', ', $vals) . ')';
-
-        // 執行 SQL 語法並回傳影響筆數
-        $stmt = static::$_db->prepare($sql);
-        $stmt->execute(array_values($bind));
-        $this->_data['id'] = static::$_db->lastInsertId();
-        return (int) $this->_data['id'];
+        $this->_data['id'] = $this->_dummydb->doInsert($this->_tableName, $this->_data);
     }
 
     protected function _doUpdate()
     {
-        // 轉換欲更新的資料
-        $bind = $this->_data;
-        $set = [];
-        $i = 0;
-        foreach ($bind as $col => $val) {
-            unset($bind[$col]);
-            if (is_array($val)) {
-                $val = array_shift($val);
-            } else {
-                $bind[':' . $col . $i] = $val;
-                $val = ':' . $col . $i;
-            }
-            $i ++;
-            $set[] = $this->quoteIdentifier($col) . ' = ' . $val;
-        }
-
-        $where = 'id = ' . $this->_data['id'];
-
-        // 建立 UPDATE 語法
-        $sql = "UPDATE "
-            . $this->quoteIdentifier($this->_tableName)
-            . ' SET ' . implode(', ', $set)
-            . (($where) ? " WHERE $where" : '');
-
-        $stmt = static::$_db->prepare($sql);
-        $stmt->execute($bind);
-        return (int) $this->_data['id'];
+        $dataID = $this->_data['id'];
+        $this->_dummydb->doUpdate($this->_tableName, $this->_data, $dataID);
     }
 
     public function find($id)
