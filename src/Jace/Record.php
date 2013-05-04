@@ -5,12 +5,14 @@ namespace Jace;
 abstract class Record
 {
     protected static $_db = null;
+    protected static $_dummydb = null;
     protected $_tableName = 'table';
     protected $_data = [];
 
     public function __construct(\PDO $db)
     {
         static::$_db = $db;
+        static::$_dummydb = $db;
     }
 
     public function __set($name, $value)
