@@ -8,9 +8,9 @@ abstract class Record
     protected $_tableName = 'table';
     protected $_data = [];
 
-    public function __construct($dsn, $username, $password)
+    public function __construct(\PDO $db)
     {
-        static::$_db = new \PDO($dsn, $username, $password);
+        static::$_db = $db;
     }
 
     public function __set($name, $value)
