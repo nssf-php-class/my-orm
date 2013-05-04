@@ -1,3 +1,3 @@
 <?php
 
-$loader = require 'ccvendor/autoload.php';
+$loader = require 'vendor/autoload.php';
