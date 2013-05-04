@@ -22,6 +22,7 @@ class RecordTest extends \PHPUnit_Framework_TestCase
         $password = 'password';
 
         $user = new User($dsn, $username, $password);
+        $a = '123';
         $user->truncate();
     }
 
